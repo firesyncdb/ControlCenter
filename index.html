@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>FireSync Control Center</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <style>
+    :root { --bg:#0b1220; --fg:#e5e7eb; --muted:#94a3b8; --bar:#0f172a; --border:#1f2937; }
+    * { box-sizing: border-box; }
+    html, body { height:100%; }
+    body { margin:0; background:var(--bg); color:var(--fg); font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+    header { height:52px; display:flex; align-items:center; gap:12px; padding:0 14px;
+             background:linear-gradient(180deg,var(--bar),#0b1220); border-bottom:1px solid var(--border); }
+    .brand { font-weight:600; letter-spacing:.2px; }
+    .spacer { flex:1; }
+    .btn { background:#0b3b52; border:1px solid var(--border); padding:6px 10px; border-radius:8px; color:#cfefff; text-decoration:none; }
+    .wrap { height:calc(100% - 52px); }
+    iframe { width:100%; height:100%; border:0; display:block; }
+    .warn { padding:10px; color:#ffcc99; font-size:12px; display:none; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">FireSync Control Center (cc.fs.hmrus.com)</div>
+    <div id="warn" class="warn">Login blocked by browser? Use “Open Securely”.</div>
+    <div class="spacer"></div>
+    <a id="openTop" class="btn" target="_blank" rel="noopener">Open Securely</a>
+  </header>
+
+  <div class="wrap">
+    <iframe id="app" sandbox="allow-scripts allow-forms allow-popups allow-same-origin"></iframe>
+  </div>
+
+  <script>
+    // Set to your Web App deployment URL (no query params)
+    const WEB_APP_BASE = 'https://script.google.com/macros/s/REPLACE_WITH_DEPLOYMENT_ID/exec';
+
+    const params = new URLSearchParams(location.search);
+    const token  = params.get('token');
+
+    const warn = document.getElementById('warn');
+    const openTop = document.getElementById('openTop');
+    const iframe = document.getElementById('app');
+
+    if (!token) {
+      warn.textContent = 'Missing token. Please open this page from the Sheets sidebar.';
+      warn.style.display = 'block';
+    } else {
+      const src = WEB_APP_BASE + '?token=' + encodeURIComponent(token);
+      iframe.src = src;
+      openTop.href = src;
+    }
+
+    window.addEventListener('message', (e) => {
+      if (e && e.data && e.data.type === 'firesync-pro-ready') {
+        warn.style.display = 'none';
+      }
+    });
+
+    setTimeout(() => { if (warn.style.display !== 'none') warn.style.display = 'block'; }, 3000);
+  </script>
+</body>
+</html>
